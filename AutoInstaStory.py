@@ -6,6 +6,9 @@ import random
 import os
 import sys
 
+videoToCrop = []
+deleteTmp = False
+
 try:
     video = sys.argv[1]
     clipLength = VideoFileClip(video)
@@ -13,6 +16,25 @@ try:
 except IndexError:
     print("Please provide a file name to parse.")
     sys.exit()
+
+if len(sys.argv) >= 3:
+    deleteTmp = True
+    for x in range (1, len(sys.argv)):
+        video = sys.argv[x]
+        videoToCrop.append(VideoFileClip(video))
+#   combinVid = concatenate_videoclips([videoToCrop[0], videoToCrop[1]])
+    combinVid = concatenate_videoclips(videoToCrop)
+    combinVid.write_videofile("temp.mp4", 
+        codec='libx264', 
+        audio_codec='aac', 
+        temp_audiofile='temp-audio.m4a', 
+        remove_temp=True
+    )
+    video = ('temp.mp4')
+    clipLength = VideoFileClip(video)
+    length = clipLength.duration
+else:
+    video = sys.argv[1]
 
 clipArr = []
 soundArr = []
@@ -38,13 +60,17 @@ for x in range(15):
     endSec += oneFifteenth
 
 # Combine Video Clips
-final_clip = concatenate_videoclips([clipArr[0], clipArr[1], clipArr[2], clipArr[3], clipArr[4], clipArr[5], clipArr[6], clipArr[7], clipArr[8], clipArr[9], clipArr[10], clipArr[11], clipArr[12], clipArr[13], clipArr[14]])
+# final_clip = concatenate_videoclips([clipArr[0], clipArr[1], clipArr[2], clipArr[3], clipArr[4], clipArr[5], clipArr[6], clipArr[7], clipArr[8], clipArr[9], clipArr[10], clipArr[11], clipArr[12], clipArr[13], clipArr[14]])
+final_clip = concatenate_videoclips(clipArr)
+
+final_clip_rot = final_clip.rotate(90)
 
 # Combine Audio Clips
-final_audio = concatenate_audioclips([sFXArr[0], sFXArr[1], sFXArr[2], sFXArr[3], sFXArr[4], sFXArr[5], sFXArr[6], sFXArr[7], sFXArr[8], sFXArr[9], sFXArr[10], sFXArr[11], sFXArr[12], sFXArr[13], sFXArr[14]])
+# final_audio = concatenate_audioclips([sFXArr[0], sFXArr[1], sFXArr[2], sFXArr[3], sFXArr[4], sFXArr[5], sFXArr[6], sFXArr[7], sFXArr[8], sFXArr[9], sFXArr[10], sFXArr[11], sFXArr[12], sFXArr[13], sFXArr[14]])
+final_audio = concatenate_audioclips(sFXArr)
 
 # Stitch Audio and Video Together
-combClip = final_clip.set_audio(final_audio)
+combClip = final_clip_rot.set_audio(final_audio)
 
 # Write Video File to Disk
 combClip.write_videofile("my_concatenation.mp4", 
@@ -53,3 +79,6 @@ combClip.write_videofile("my_concatenation.mp4",
   temp_audiofile='temp-audio.m4a', 
   remove_temp=True
 )
+
+if deleteTmp == True:
+    os.remove('temp.mp4')
