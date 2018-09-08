@@ -1,11 +1,18 @@
 from moviepy.editor import VideoFileClip, concatenate_videoclips, AudioClip, AudioFileClip, concatenate_audioclips
 import moviepy.audio.fx.audio_fadein, moviepy.audio.fx.audio_fadeout
 
+import uuid
 import random
 
 import os
 import sys
 
+def my_random_string(string_length=10):
+    """Returns a random string of length string_length."""
+    random = str(uuid.uuid4()) # Convert UUID format to a Python string.
+    random = random.upper() # Make all characters uppercase.
+    random = random.replace("-","") # Remove the UUID '-'.
+    return random[0:string_length] # Return the random string.
 videoToCrop = []
 deleteTmp = False
 
@@ -24,13 +31,16 @@ if len(sys.argv) >= 3:
         videoToCrop.append(VideoFileClip(video))
 #   combinVid = concatenate_videoclips([videoToCrop[0], videoToCrop[1]])
     combinVid = concatenate_videoclips(videoToCrop)
-    combinVid.write_videofile("temp.mp4", 
+    rndStr = my_random_string(10)
+    print rndStr
+    tempName = "temp_" + rndStr + ".mp4"
+    combinVid.write_videofile(tempName, 
         codec='libx264', 
         audio_codec='aac', 
         temp_audiofile='temp-audio.m4a', 
         remove_temp=True
     )
-    video = ('temp.mp4')
+    video = (tempName)
     clipLength = VideoFileClip(video)
     length = clipLength.duration
 else:
@@ -74,11 +84,11 @@ combClip = final_clip_rot.set_audio(final_audio)
 
 # Write Video File to Disk
 combClip.write_videofile("my_concatenation.mp4", 
-  codec='libx264', 
+  codec='libx264',
   audio_codec='aac', 
   temp_audiofile='temp-audio.m4a', 
   remove_temp=True
 )
 
 if deleteTmp == True:
-    os.remove('temp.mp4')
+    os.remove(tempName)
