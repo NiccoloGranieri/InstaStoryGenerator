@@ -7,6 +7,7 @@ import random
 import os
 import sys
 
+# Creation of a random string for temp filenames
 def my_random_string(string_length=10):
     """Returns a random string of length string_length."""
     random = str(uuid.uuid4()) # Convert UUID format to a Python string.
